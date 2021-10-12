@@ -14,7 +14,7 @@ from .token_utils import get_unverified_claims, get_unverified_headers, check_ex
 
 
 @lru_cache(maxsize=1)
-def get_keys(keys_url: str) -> List[dict]:
+def get_keys(keys_url):
     if keys_url.startswith("http"):
         r = requests.get(keys_url)
         keys_response = r.json()
@@ -24,9 +24,9 @@ def get_keys(keys_url: str) -> List[dict]:
     return keys_response.get('keys')
 
 
-def get_public_key(token: str, region: str, userpool_id: str):
-    keys_url: str = os.environ.get('AWS_COGNITO_JWKS_PATH') or PUBLIC_KEYS_URL_TEMPLATE.format(region, userpool_id)
-    keys: list = get_keys(keys_url)
+def get_public_key(token, region, userpool_id):
+    keys_url = os.environ.get('AWS_COGNITO_JWKS_PATH') or PUBLIC_KEYS_URL_TEMPLATE.format(region, userpool_id)
+    keys = get_keys(keys_url)
     headers = get_unverified_headers(token)
     kid = headers['kid']
 
@@ -39,13 +39,7 @@ def get_public_key(token: str, region: str, userpool_id: str):
     return jwk.construct(key)
 
 
-def decode(
-        token: str,
-        region: str,
-        userpool_id: str,
-        app_client_id: Optional[Union[str, Container[str]]] = None,
-        testmode: bool = False
-) -> Dict:
+def decode(token, region, userpool_id, app_client_id, testmode=False):
     message, encoded_signature = str(token).rsplit('.', 1)
 
     decoded_signature = base64url_decode(encoded_signature.encode('utf-8'))
