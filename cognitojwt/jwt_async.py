@@ -26,9 +26,9 @@ async def get_keys_async(keys_url: str) -> List[dict]:
     return response.get('keys')
 
 
-async def get_public_key_async(token: str, region: str, userpool_id: str):
-    keys_url: str = os.environ.get('AWS_COGNITO_JWKS_PATH') or PUBLIC_KEYS_URL_TEMPLATE.format(region, userpool_id)
-    keys: list = await get_keys_async(keys_url)
+async def get_public_key_async(token, region, userpool_id):
+    keys_url = os.environ.get('AWS_COGNITO_JWKS_PATH') or PUBLIC_KEYS_URL_TEMPLATE.format(region, userpool_id)
+    keys = await get_keys_async(keys_url)
     headers = get_unverified_headers(token)
     kid = headers['kid']
 
@@ -41,13 +41,7 @@ async def get_public_key_async(token: str, region: str, userpool_id: str):
     return jwk.construct(key)
 
 
-async def decode_async(
-        token: str,
-        region: str,
-        userpool_id: str,
-        app_client_id: Optional[Union[str, Container[str]]] = None,
-        testmode: bool = False
-) -> Dict:
+async def decode_async(token, region, userpool_id, app_client_id, testmode=False):
     message, encoded_signature = str(token).rsplit('.', 1)
 
     decoded_signature = base64url_decode(encoded_signature.encode('utf-8'))
